@@ -16,6 +16,6 @@ and is expected to have been downloaded to the `data/cosmx-lung` folder.
 Per-cell target probe counts per area vs. tissue-wide xy-coordinates
 and, for CosMx, average counts per area across local coordinates.
 - **cosmx_lung_gc.R** and **cosmx_lung_iso.R**:
-Median target probe detection vs. mean GC percentage across the probe set and  
+Median target probe detection vs. mean GC percentage across the probe set and
 number of distinct isoforms in the probe set, respectively, stratified by sample.
 - **cosmx_lung_z.R**: Transcript counts by z-slice vs. FOV and visualized spatially, respectively.
