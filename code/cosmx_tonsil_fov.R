@@ -1,6 +1,7 @@
 # dependencies
 suppressPackageStartupMessages({
     library(zoo)
+    library(pals)
     library(ggplot2)
     library(ggrastr)
     library(SpatialExperiment)
@@ -21,6 +22,8 @@ df <- data.frame(colData(sce))
 xs <- cut(.x, seq(min(.x), max(.x), l=100), include.lowest=TRUE, right=TRUE)
 ys <- cut(.y, seq(min(.y), max(.y), l=100), include.lowest=TRUE, right=TRUE)
 df <- mutate(df, xs, ys, val=nCount_RNA/Area.um2)
+
+# lines ----
 
 # smoothing
 df <- df |>
@@ -44,5 +47,25 @@ gg <- wrap_plots(px, py, ncol=1) &
     theme_bw(4) & theme(aspect.ratio=1/3, panel.grid.minor=element_blank())
 
 # saving
-pdf <- file.path(dir, "figs", "cosmx_fov.pdf")
+pdf <- file.path(dir, "figs", "cosmx_fov1.pdf")
 ggsave(pdf, gg, units="cm", width=4, height=3)
+
+# space ----
+
+# aggregation
+fd <- df |>
+    group_by(xs, ys) |>
+    summarise_at("val", mean)
+
+# plotting
+gg <- ggplot(fd, aes(xs, ys, fill=val)) + geom_tile() + 
+    scale_fill_gradientn(colors=rev(rev(gnuplot()))) +
+    scale_y_discrete(limits=\(.) rev(.)) +
+    labs(fill="average\ncount/area") +
+    coord_equal() + theme_void(4) + theme(
+        legend.key.width=unit(0.4, "lines"),
+        legend.key.height=unit(0.8, "lines"))
+
+# saving
+pdf <- file.path(dir, "figs", "cosmx_fov2.pdf")
+ggsave(pdf, gg, units="cm", width=5, height=4)
