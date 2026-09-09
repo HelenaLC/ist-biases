@@ -61,5 +61,5 @@ gg <- wrap_plots(px, py, ncol=1) &
 
 # saving
 dir <- dirname(dirname(rstudioapi::getActiveDocumentContext()$path))
-pdf <- file.path(dir, "figs", "fov_xenium.pdf")
+pdf <- file.path(dir, "figs", "xenium_fov.pdf")
 ggsave(pdf, gg, units="cm", width=4, height=3)
