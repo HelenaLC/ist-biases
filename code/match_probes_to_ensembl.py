@@ -6,10 +6,14 @@ from __future__ import annotations
 import argparse
 import csv
 from collections import defaultdict
-from pathlib import Path
 
-from ensembl_probe_common import parse_ensembl_gtf
-from probe_refseq_common import read_probes, write_tsv
+from probe_ensembl_common import (
+    DEFAULT_PROBES, SCRIPT_DIR, ensure_ensembl_file, parse_ensembl_gtf, read_probes,
+    write_tsv,
+)
+
+
+GENE_ALIASES = {"C9orf16": {"BBLN"}, "DDX58": {"RIGI"}}
 
 
 MATCH_FIELDS = [
@@ -48,23 +52,18 @@ def classify(signatures):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--probes", default="probes.csv")
-    parser.add_argument("--alignments", default="results_ensembl/probe_transcript_alignments.tsv")
-    parser.add_argument("--gtf", required=True)
-    parser.add_argument("--gene-aliases", default="gene_aliases.tsv",
-                        help="Optional TSV mapping input_gene to annotation_gene")
-    parser.add_argument("--matches", default="results_ensembl/probe_isoform_matches.tsv")
-    parser.add_argument("--probe-summary", default="results_ensembl/probe_isoform_summary.tsv")
-    parser.add_argument("--gene-summary", default="results_ensembl/gene_isoform_summary.tsv")
+    parser.add_argument("--probes", default=DEFAULT_PROBES)
+    parser.add_argument("--alignments", default=SCRIPT_DIR / "results_ensembl/probe_transcript_alignments.tsv")
+    parser.add_argument("--gtf", help="Ensembl GTF; release 116 is downloaded by default")
+    parser.add_argument("--matches", default=SCRIPT_DIR / "results_ensembl/probe_isoform_matches.tsv")
+    parser.add_argument("--probe-summary", default=SCRIPT_DIR / "results_ensembl/probe_isoform_summary.tsv")
+    parser.add_argument("--gene-summary", default=SCRIPT_DIR / "results_ensembl/gene_isoform_summary.tsv")
     args = parser.parse_args()
 
     probes = read_probes(args.probes)
-    metadata, _ = parse_ensembl_gtf(args.gtf)
-    aliases = defaultdict(set)
-    if args.gene_aliases:
-        with open(args.gene_aliases, encoding="utf-8", newline="") as handle:
-            for row in csv.DictReader(handle, delimiter="\t"):
-                aliases[row["input_gene"]].add(row["annotation_gene"])
+    gtf = args.gtf or ensure_ensembl_file("gtf")
+    metadata, _ = parse_ensembl_gtf(gtf)
+    aliases = GENE_ALIASES
     annotated_by_gene = defaultdict(set)
     for accession, meta in metadata.items():
         if meta["gene"]:
@@ -102,7 +101,6 @@ def main():
             "transcript_support_level": meta["transcript_support_level"], "tags": meta["tags"],
         })
 
-    Path(args.matches).parent.mkdir(parents=True, exist_ok=True)
     write_tsv(args.matches, MATCH_FIELDS, match_rows)
 
     probes_by_gene = defaultdict(list)

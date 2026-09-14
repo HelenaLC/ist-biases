@@ -7,9 +7,10 @@ import argparse
 import csv
 from pathlib import Path
 
-from ensembl_probe_common import map_probes_to_ensembl, parse_ensembl_gtf, ucsc_chrom_name
-from probe_refseq_common import (
-    read_probes, read_ucsc_names, transcript_interval_to_blocks, write_tsv,
+from probe_ensembl_common import (
+    DEFAULT_PROBES, SCRIPT_DIR, ensure_ensembl_file, ensure_ucsc_chrom_alias,
+    map_probes_to_ensembl, parse_ensembl_gtf, read_probes, read_ucsc_chrom_aliases,
+    transcript_interval_to_blocks, write_tsv,
 )
 
 
@@ -21,19 +22,20 @@ ALIGNMENT_FIELDS = [
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--probes", default="probes.csv")
-    parser.add_argument("--transcripts", nargs="+", required=True,
-                        help="Ensembl cDNA and ncRNA FASTA files")
-    parser.add_argument("--gtf", required=True)
-    parser.add_argument("--assembly-report", required=True)
-    parser.add_argument("--bed", default="results_ensembl/probes_hg38_ensembl116.bed")
-    parser.add_argument("--alignments", default="results_ensembl/probe_transcript_alignments.tsv")
+    parser.add_argument("--probes", default=DEFAULT_PROBES)
+    parser.add_argument("--transcripts", nargs="+",
+                        help="Ensembl cDNA and ncRNA FASTA files; release 116 is downloaded by default")
+    parser.add_argument("--gtf", help="Ensembl GTF; release 116 is downloaded by default")
+    parser.add_argument("--bed", default=SCRIPT_DIR / "results_ensembl/probes_hg38_ensembl116.bed")
+    parser.add_argument("--alignments", default=SCRIPT_DIR / "results_ensembl/probe_transcript_alignments.tsv")
     args = parser.parse_args()
 
+    transcripts = args.transcripts or [ensure_ensembl_file("cdna"), ensure_ensembl_file("ncrna")]
+    gtf = args.gtf or ensure_ensembl_file("gtf")
     probes = read_probes(args.probes)
-    _, loci = parse_ensembl_gtf(args.gtf)
-    assembly_names = read_ucsc_names(args.assembly_report)
-    matches = sorted(map_probes_to_ensembl(probes, args.transcripts),
+    _, loci = parse_ensembl_gtf(gtf)
+    chromosome_aliases = read_ucsc_chrom_aliases(ensure_ucsc_chrom_alias())
+    matches = sorted(map_probes_to_ensembl(probes, transcripts),
                      key=lambda x: (probes[x[0]].target, probes[x[0]].probe_id, x[1], x[2], x[4]))
 
     Path(args.bed).parent.mkdir(parents=True, exist_ok=True)
@@ -57,7 +59,7 @@ def main():
             if not blocks or sum(b - a for a, b in blocks) != length:
                 continue
             matched_locus = True
-            chrom = ucsc_chrom_name(locus.seqid, assembly_names)
+            chrom = chromosome_aliases.get(locus.seqid, locus.seqid)
             chrom_start, chrom_end = blocks[0][0], blocks[-1][1]
             key = (probe.probe_id, chrom, locus.strand, tuple(blocks))
             bed_records[key] = (

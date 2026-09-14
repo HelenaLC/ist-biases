@@ -1,6 +1,6 @@
 # Probe-to-Ensembl mapping
 
-This analysis uses the latest Ensembl human release available on 2026-07-22:
+This analysis uses these pinned human references:
 
 - Ensembl release: 116 (June 2026)
 - assembly: GRCh38.p14 / `GCA_000001405.29`
@@ -8,26 +8,41 @@ This analysis uses the latest Ensembl human release available on 2026-07-22:
 - non-coding transcripts: `Homo_sapiens.GRCh38.ncrna.fa.gz`
 - annotation: `Homo_sapiens.GRCh38.116.chr_patch_hapl_scaff.gtf.gz`
 
-The three downloads in `ensembl/116/` were checked successfully with the
-official Ensembl `CHECKSUMS` manifests stored alongside them.
+The scripts download missing references directly from the Ensembl release-116
+archive into `ensembl/116/`. Each download is checked against its exact byte
+count and a pinned SHA-256 digest (and was independently checked against the
+corresponding Ensembl `CHECKSUMS` entry). GTF is the GFF2-derived annotation
+format consumed by the coordinate and metadata parser.
+
+```text
+683eb19310c40bf1396e4718f45afa2ce86755717c0990f47a171f535d248ea1  Homo_sapiens.GRCh38.cdna.all.fa.gz
+7f03bb303e939517b322f7887a74c1ee15bbb82a6affbb54f0be84e82f89cff1  Homo_sapiens.GRCh38.ncrna.fa.gz
+ef38b04cde03949d3b6a965575f1cad7861098ef029e7e8ed35c84debcaf13b8  Homo_sapiens.GRCh38.116.chr_patch_hapl_scaff.gtf.gz
+43aac315a93939c54d8b168ea8118fb7760b5e7ff8653f59dd712cfc7467be56  hg38.chromAlias.txt.gz
+```
+
+The small pinned UCSC chromosome-alias table converts Ensembl primary,
+patch, and haplotype sequence names to valid hg38 custom-track names.
+
+Python 3.8 or later is required. There are no third-party Python dependencies.
+The probe input is `../data/cosmx-lung-probes.csv`, a semicolon-delimited CosMx
+probe export. Its SHA-256 digest is:
+
+```text
+4983f4c247e7c2bf7923c6cffebc6de0d8ab44bb81d61870319e6ec5ca06d107
+```
 
 ## Reproduce the outputs
 
 ```sh
-python3 make_ensembl_ucsc_track.py \
-  --transcripts \
-    ensembl/116/Homo_sapiens.GRCh38.cdna.all.fa.gz \
-    ensembl/116/Homo_sapiens.GRCh38.ncrna.fa.gz \
-  --gtf ensembl/116/Homo_sapiens.GRCh38.116.chr_patch_hapl_scaff.gtf.gz \
-  --assembly-report refseq/GCF_000001405.40_GRCh38.p14_assembly_report.txt
-
-python3 match_probes_to_ensembl.py \
-  --gtf ensembl/116/Homo_sapiens.GRCh38.116.chr_patch_hapl_scaff.gtf.gz
+cd code
+python3 make_ensembl_ucsc_track.py
+python3 match_probes_to_ensembl.py
 ```
 
-No non-standard Python packages are required. `gene_aliases.tsv` reconciles the
-input symbols `C9orf16` and `DDX58` with the current annotation symbols `BBLN`
-and `RIGI`. This affects intended-gene labeling only, not sequence matches.
+The aliases `C9orf16` -> `BBLN` and `DDX58` -> `RIGI` are recorded in
+`match_probes_to_ensembl.py`. They affect intended-gene labeling only, not
+sequence matches.
 
 ## Outputs
 
@@ -38,6 +53,20 @@ and `RIGI`. This affects intended-gene labeling only, not sequence matches.
   support levels, source assembly regions, and orientations.
 - `results_ensembl/probe_isoform_summary.tsv`: one row per input probe.
 - `results_ensembl/gene_isoform_summary.tsv`: one row per target gene.
+
+A successful reproduction creates a gene summary identical to
+`../data/cosmx-lung.tsv` (961 lines including its header), with SHA-256 digest:
+
+```text
+62be89cc4e4197cd4bb589d77a48c4937a1544237589876357c6e33ef30a8d12
+```
+
+Verify it with:
+
+```sh
+cmp results_ensembl/gene_isoform_summary.tsv ../data/cosmx-lung.tsv
+shasum -a 256 results_ensembl/gene_isoform_summary.tsv
+```
 
 The gene-level classifications have the same definitions as the RefSeq run:
 
