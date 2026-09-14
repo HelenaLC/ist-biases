@@ -19,3 +19,5 @@ and, for CosMx, average counts per area across local coordinates.
 Median target probe detection vs. mean GC percentage across the probe set and
 number of distinct isoforms in the probe set, respectively, stratified by sample.
 - **cosmx_lung_z.R**: Transcript counts by z-slice vs. FOV and visualized spatially, respectively.
+- **make_ensembl_ucsc_track.py**: Download Ensembl annotation and match probe sequences to genes.
+- **match_probes_to_ensembl.py**: Produces per gene and per probe summaries.
