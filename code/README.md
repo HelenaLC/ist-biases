@@ -36,23 +36,23 @@ probe export. Its SHA-256 digest is:
 
 ```sh
 cd code
-python3 make_ensembl_ucsc_track.py
-python3 match_probes_to_ensembl.py
+python3 ensembl_make_ucsc_track.py
+python3 ensembl_match_probes.py
 ```
 
-The aliases `C9orf16` -> `BBLN` and `DDX58` -> `RIGI` are recorded in
-`match_probes_to_ensembl.py`. They affect intended-gene labeling only, not
-sequence matches.
+The aliases `C9orf16` -> `BBLN` and `DDX58` -> `RIGI` are recorded in 
+`ensembl_match_probes.py`. They affect intended-gene labeling only, 
+not sequence matches.
 
 ## Outputs
 
-- `results_ensembl/probes_hg38_ensembl116.bed`: UCSC hg38 BED12 custom track.
-- `results_ensembl/probe_transcript_alignments.tsv`: raw exact transcript hits.
-- `results_ensembl/probe_isoform_matches.tsv`: annotated long match table with
+- `ensembl/probes_hg38_ensembl116.bed`: UCSC hg38 BED12 custom track.
+- `ensembl/probe_transcript_alignments.tsv`: raw exact transcript hits.
+- `ensembl/probe_isoform_matches.tsv`: annotated long match table with
   versioned Ensembl transcript and gene identifiers, biotypes, tags, transcript
   support levels, source assembly regions, and orientations.
-- `results_ensembl/probe_isoform_summary.tsv`: one row per input probe.
-- `results_ensembl/gene_isoform_summary.tsv`: one row per target gene.
+- `ensembl/probe_isoform_summary.tsv`: one row per input probe.
+- `ensembl/gene_isoform_summary.tsv`: one row per target gene.
 
 A successful reproduction creates a gene summary identical to
 `../data/cosmx-lung.tsv` (961 lines including its header), with SHA-256 digest:
@@ -64,8 +64,8 @@ A successful reproduction creates a gene summary identical to
 Verify it with:
 
 ```sh
-cmp results_ensembl/gene_isoform_summary.tsv ../data/cosmx-lung.tsv
-shasum -a 256 results_ensembl/gene_isoform_summary.tsv
+cmp ensembl/gene_isoform_summary.tsv ../data/cosmx-lung.tsv
+shasum -a 256 ensembl/gene_isoform_summary.tsv
 ```
 
 The gene-level classifications have the same definitions as the RefSeq run:

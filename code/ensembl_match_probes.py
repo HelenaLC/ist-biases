@@ -7,7 +7,7 @@ import argparse
 import csv
 from collections import defaultdict
 
-from probe_ensembl_common import (
+from ensembl_probe_common import (
     DEFAULT_PROBES, SCRIPT_DIR, ensure_ensembl_file, parse_ensembl_gtf, read_probes,
     write_tsv,
 )
@@ -53,11 +53,11 @@ def classify(signatures):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--probes", default=DEFAULT_PROBES)
-    parser.add_argument("--alignments", default=SCRIPT_DIR / "results_ensembl/probe_transcript_alignments.tsv")
+    parser.add_argument("--alignments", default=SCRIPT_DIR / "ensembl/probe_transcript_alignments.tsv")
     parser.add_argument("--gtf", help="Ensembl GTF; release 116 is downloaded by default")
-    parser.add_argument("--matches", default=SCRIPT_DIR / "results_ensembl/probe_isoform_matches.tsv")
-    parser.add_argument("--probe-summary", default=SCRIPT_DIR / "results_ensembl/probe_isoform_summary.tsv")
-    parser.add_argument("--gene-summary", default=SCRIPT_DIR / "results_ensembl/gene_isoform_summary.tsv")
+    parser.add_argument("--matches", default=SCRIPT_DIR / "ensembl/probe_isoform_matches.tsv")
+    parser.add_argument("--probe-summary", default=SCRIPT_DIR / "ensembl/probe_isoform_summary.tsv")
+    parser.add_argument("--gene-summary", default=SCRIPT_DIR / "ensembl/gene_isoform_summary.tsv")
     args = parser.parse_args()
 
     probes = read_probes(args.probes)

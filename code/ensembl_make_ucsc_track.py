@@ -7,7 +7,7 @@ import argparse
 import csv
 from pathlib import Path
 
-from probe_ensembl_common import (
+from ensembl_probe_common import (
     DEFAULT_PROBES, SCRIPT_DIR, ensure_ensembl_file, ensure_ucsc_chrom_alias,
     map_probes_to_ensembl, parse_ensembl_gtf, read_probes, read_ucsc_chrom_aliases,
     transcript_interval_to_blocks, write_tsv,
@@ -26,8 +26,8 @@ def main():
     parser.add_argument("--transcripts", nargs="+",
                         help="Ensembl cDNA and ncRNA FASTA files; release 116 is downloaded by default")
     parser.add_argument("--gtf", help="Ensembl GTF; release 116 is downloaded by default")
-    parser.add_argument("--bed", default=SCRIPT_DIR / "results_ensembl/probes_hg38_ensembl116.bed")
-    parser.add_argument("--alignments", default=SCRIPT_DIR / "results_ensembl/probe_transcript_alignments.tsv")
+    parser.add_argument("--bed", default=SCRIPT_DIR / "ensembl/probes_hg38_ensembl116.bed")
+    parser.add_argument("--alignments", default=SCRIPT_DIR / "ensembl/probe_transcript_alignments.tsv")
     args = parser.parse_args()
 
     transcripts = args.transcripts or [ensure_ensembl_file("cdna"), ensure_ensembl_file("ncrna")]

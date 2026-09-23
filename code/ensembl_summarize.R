@@ -3,7 +3,7 @@
 # Summarize probe/isoform coverage in data/cosmx-lung.tsv.
 #
 # Usage:
-#   Rscript summarize_cosmx_lung_probe_coverage.R [input.tsv] [output.tsv] [annotation.gtf.gz]
+#   Rscript ensembl_summarize.R [input.tsv] [output.tsv] [annotation.gtf.gz]
 #
 # The Ensembl GTF is needed only for the MANE Select metric because the input
 # gene summary contains transcript accessions, but not transcript tags.
@@ -18,7 +18,7 @@ script_dir <- if (length(script_arg) > 0L) {
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args) > 3L) {
     stop(
-        "Usage: Rscript summarize_cosmx_lung_probe_coverage.R ",
+        "Usage: Rscript ensembl_summarize.R ",
         "[input.tsv] [output.tsv] [annotation.gtf.gz]",
         call. = FALSE
     )
